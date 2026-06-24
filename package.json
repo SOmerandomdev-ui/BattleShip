@@ -1,0 +1,36 @@
+{
+  "name": "battleship",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SOmerandomdev-ui/BattleShip.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/SOmerandomdev-ui/BattleShip/issues"
+  },
+  "homepage": "https://github.com/SOmerandomdev-ui/BattleShip#readme",
+  "type": "module",
+  "devDependencies": {
+    "@babel/preset-env": "^8.0.2",
+    "babel-jest": "^30.4.1",
+    "css-loader": "^7.1.4",
+    "eslint": "^10.5.0",
+    "globals": "^17.7.0",
+    "html-loader": "^5.1.0",
+    "html-webpack-plugin": "^5.6.7",
+    "jest": "^30.4.2",
+    "prettier": "3.8.4",
+    "style-loader": "^4.0.0",
+    "webpack": "^5.107.2",
+    "webpack-cli": "^7.0.3",
+    "webpack-dev-server": "^5.2.5"
+  }
+}
