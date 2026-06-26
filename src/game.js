@@ -2,7 +2,8 @@ import {Gameboard, Ship, Player} from "./index.js"
 import "./styles.css"
 
 function AddShips(Parent) {
-    const ShipContainer = document.createElement("div")
+    //Ship Container title
+    const ShipContainer = document.createElement('div')
     ShipContainer.classList.add("ShipContainer")
     Parent.appendChild(ShipContainer)
 
@@ -10,6 +11,71 @@ function AddShips(Parent) {
     ShipContainerTitle.classList.add("ShipContainerTitle")
     ShipContainerTitle.textContent = "Ship Container"
     ShipContainer.appendChild(ShipContainerTitle)
+
+    const ShipContainList = document.createElement('select')
+    ShipContainList.classList.add("ShipContainList")
+    ShipContainer.appendChild(ShipContainList)
+
+    const Placeholder = document.createElement('option')
+    Placeholder.textContent = "Select Ship"
+    ShipContainList.appendChild(Placeholder)
+
+    //Create the ship Selection
+    let ShipArray = ["Destroyer", "Submarine", "Cruiser", "Battleship", "Aircraft-Carrier"]
+    for (let i = 0; i < 5; i++) {
+        const ShipOption = document.createElement('option')
+        ShipOption.classList.add(`${ShipArray[i]}`)
+        ShipOption.value = ShipArray[i]
+        ShipOption.textContent = `${ShipArray[i]} ${i + 1} Spaces`
+        ShipContainList.appendChild(ShipOption)
+    }
+
+    //Create the ship coordinate
+    const ShipCoordinate = document.createElement('input')
+    ShipCoordinate.type = "text"
+    ShipCoordinate.classList.add("ShipCoordinate")
+    ShipCoordinate.placeholder = "Enter a coordinate"
+    ShipContainer.appendChild(ShipCoordinate)
+
+    //submission button and the event listener for it
+    const Submission = document.createElement("button")
+    ShipContainer.appendChild(Submission)
+    Submission.classList.add("Submission")
+    Submission.textContent = "Submit"
+    
+    //Submission for checking if the Ship and coordinate are valid 
+    Submission.addEventListener("click", (e) => {
+        e.preventDefault()
+
+        if (ShipContainList.value == "Select Ship") {
+            alert("Please Enter a ship")
+            return
+        }
+
+        if (!ShipCoordinate.value) {
+            alert("Please Enter a Coodinate")
+            return
+        }
+
+        if (!/^[0-9,]+$/.test(ShipCoordinate.value)) {
+            alert("Please enter a valid coordinate e.g. 1,2")
+            return
+        }
+
+        let ShipCoordinateList = ShipCoordinate.value.split(",")
+        if (parseInt(ShipCoordinateList[0]) < 1 || parseInt(ShipCoordinateList[0]) > 10 || parseInt(ShipCoordinateList[1]) < 1 || parseInt(ShipCoordinateList[1]) > 10) {
+            alert("Please Enter a coodinate between 1 and 10")
+            return
+        }
+
+        ShipContainList.remove(ShipContainList.selectedIndex)
+
+
+    })
+
+
+    
+    
 
 }
 
@@ -47,6 +113,13 @@ Twoplayer.addEventListener("click", () => {
             squarerow.appendChild(square)
         }
     }
+
+    //select all the grid 
+    const squares = document.querySelectorAll('.square')
+    squares.forEach(element => {
+        element.addEventListener("click", () =>
+        element.style.background = "red")
+    });
 
     //Message telling you to place the boats 
     const Message = document.createElement("div")

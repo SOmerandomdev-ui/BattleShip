@@ -95,5 +95,26 @@ body {
 
         font-size: 2rem;
     }
+
+    & > .ShipContainList {
+        display: flex;
+
+        margin-left: 1rem;
+        margin-top: 1rem;
+    }
+
+    & > .ShipCoordinate {
+        margin-left: 1rem;
+        margin-top: 1rem;
+
+    }
+
+    & > .Submission {
+        display: flex;
+
+        margin-left: 1rem;
+        margin-top: 1rem;
+    }
 }
-    
+
+
