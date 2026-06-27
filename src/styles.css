@@ -60,8 +60,14 @@ body {
 }
 
 .square {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
     background: radial-gradient(circle at center, #4bb3d6, #3AB4D4, #1A6B8A);
     border: 0.5px rgb(172, 179, 186) solid;
+    font-size: 2rem;
+    font-weight: bold;
 
     width: 10%;
     height: 100%;   
@@ -103,10 +109,15 @@ body {
         margin-top: 1rem;
     }
 
-    & > .ShipCoordinate {
+    & > .ShipCoordinateStart {
         margin-left: 1rem;
         margin-top: 1rem;
 
+    }
+
+    & > .ShipCoordinateEnd {
+        margin-left: 1rem;
+        margin-top: 1rem;
     }
 
     & > .Submission {

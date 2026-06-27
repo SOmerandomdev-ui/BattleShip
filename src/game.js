@@ -1,7 +1,87 @@
 import {Gameboard, Ship, Player} from "./index.js"
 import "./styles.css"
 
-function AddShips(Parent) {
+//Calculate distance for the coordinates
+function CalculateDistance(start, end, ship) {
+    let distance = null
+    if (start[0] == end[0]) distance = Math.abs(start[1] - end[1])
+    if (start[1] == end[1]) distance = Math.abs(start[0] - end[0])
+
+    if (ship == "Destroyer" && distance != 1) {
+        alert("The distance should be only 2 units")
+        return true
+    }
+
+    if (ship == "Submarine" && distance != 2) {
+        alert("The distance should be only 3 units")
+        return true
+    }
+
+    if (ship == "Cruiser" && distance != 3) {
+        alert("The distance should be only 4 units")
+        return true
+    }
+
+    if (ship == "Battleship" && distance != 4) {
+        alert("The distance should be only 5 units")
+        return true
+    }
+
+    if (ship == "Aircraft-Carrier" && distance != 5) {
+        alert("The distance should be only 6 units")
+        return true
+    }
+}
+
+//Places the markers 
+function PlaceShips(start, end, Gameboard, Ship) {
+    let PositionArray = []
+    if (start[0] == end[0]) {
+        let Begin = start[1]
+        let Finish = end[1]
+
+        while (Begin <= Finish) {
+            if (Gameboard.board[Begin - 1][start[0] - 1]) {
+                alert("That space is already taken")
+                return false
+            }
+
+            PositionArray.push([Begin - 1, start[0] - 1])
+            Begin += 1
+        }
+
+        for (let item of PositionArray) {
+            let x = item[0]
+            let y = item[1]
+            Gameboard.board[x][y] = Ship[0]
+        }
+    }
+
+    if (start[1] == end[1]) {
+        let Begin = start[0]
+        let Finish = end[0]
+
+        while (Begin <= Finish) {
+            if (Gameboard.board[Begin - 1][start[1] - 1]) {
+            alert("That space is already taken")
+            return false
+        }
+
+            PositionArray.push([Begin - 1, start[1] - 1])
+            Begin += 1
+        }
+
+        for (let item of PositionArray) {
+            let x = item[0]
+            let y = item[1]
+            Gameboard.board[x][y] = Ship[0]
+        }
+    }
+    console.log(PositionArray)
+    return PositionArray
+}
+
+function AddShips(Parent, Player) {
     //Ship Container title
     const ShipContainer = document.createElement('div')
     ShipContainer.classList.add("ShipContainer")
@@ -26,16 +106,23 @@ function AddShips(Parent) {
         const ShipOption = document.createElement('option')
         ShipOption.classList.add(`${ShipArray[i]}`)
         ShipOption.value = ShipArray[i]
-        ShipOption.textContent = `${ShipArray[i]} ${i + 1} Spaces`
+        ShipOption.textContent = `${ShipArray[i]} ${i + 2} Spaces`
         ShipContainList.appendChild(ShipOption)
     }
 
-    //Create the ship coordinate
-    const ShipCoordinate = document.createElement('input')
-    ShipCoordinate.type = "text"
-    ShipCoordinate.classList.add("ShipCoordinate")
-    ShipCoordinate.placeholder = "Enter a coordinate"
-    ShipContainer.appendChild(ShipCoordinate)
+    //Create the ship coordinate for start and end
+    const ShipCoordinateStart = document.createElement('input')
+    ShipCoordinateStart.type = "text"
+    ShipCoordinateStart.classList.add("ShipCoordinateStart")
+    ShipCoordinateStart.placeholder = "Enter a start coordinate"
+    ShipContainer.appendChild(ShipCoordinateStart)
+
+    const ShipCoordinateEnd = document.createElement('input')
+    ShipCoordinateEnd.type = "text"
+    ShipCoordinateEnd.classList.add("ShipCoordinateEnd")
+    ShipCoordinateEnd.placeholder = "Enter an end coordinate"
+    ShipContainer.appendChild(ShipCoordinateEnd)
+
 
     //submission button and the event listener for it
     const Submission = document.createElement("button")
@@ -52,23 +139,70 @@ function AddShips(Parent) {
             return
         }
 
-        if (!ShipCoordinate.value) {
-            alert("Please Enter a Coodinate")
+        if (!ShipCoordinateStart.value && !ShipCoordinateEnd.value) {
+            alert("Please Enter a Coordinate")
             return
         }
 
-        if (!/^[0-9,]+$/.test(ShipCoordinate.value)) {
+        if (!/^[0-9, ]+$/.test(ShipCoordinateStart.value) && !/^[0-9, ]+$/.test(ShipCoordinateEnd.value)) {
             alert("Please enter a valid coordinate e.g. 1,2")
             return
         }
 
-        let ShipCoordinateList = ShipCoordinate.value.split(",")
-        if (parseInt(ShipCoordinateList[0]) < 1 || parseInt(ShipCoordinateList[0]) > 10 || parseInt(ShipCoordinateList[1]) < 1 || parseInt(ShipCoordinateList[1]) > 10) {
-            alert("Please Enter a coodinate between 1 and 10")
+        //Get the x and y coordinates for the start and the end
+        let ShipCoordinateStartList = ShipCoordinateStart.value.split(",")
+        let ShipCoordinateEndList = ShipCoordinateEnd.value.split(",")
+        const Startx = parseInt(ShipCoordinateStartList[0])
+        const Starty = parseInt(ShipCoordinateStartList[1])
+        const Endx = parseInt(ShipCoordinateEndList[0])
+        const Endy = parseInt(ShipCoordinateEndList[1])
+        const Ship = ShipContainList.value
+        
+        if (Startx < 1 || Startx > 10 || Starty < 1 || Starty > 10 || Endx < 1 || Endx > 10 || Endy < 1 || Endy > 10) {
+            alert("Please Enter a coodinate between 1 and 10 for the start and end points")
             return
         }
 
+        //Check to see if the coordinates fit with the ship length 
+        if (CalculateDistance([Startx, Starty], [Endx, Endy], Ship)) return
+
+        //Check to see if the user is trying to place them diagonally 
+        if (Startx != Endx && Starty != Endy) {
+            alert("Ships can only be placed horizontally and vertically")
+            return
+        }
+
+        //Add the ship to the gameboard array  
+        const PlaceShipReturn = PlaceShips([Startx, Starty], [Endx, Endy], Player.Gameboard, Ship)
+        if (!PlaceShipReturn) return 
+        console.log(Player.Gameboard)
+
+        //Find the squares which have ships on them 
+        const DomCoordinates = PlaceShipReturn.map(array => array[1] + array[0] * 10)
+        console.log(DomCoordinates)
+
+        //select all the grid 
+        const squares = document.querySelectorAll('.square');
+        squares.forEach((element, index) => {
+            const row = Math.floor(index / 10);
+            const col = index % 10;
+            const flipped = (9 - row) * 10 + col;
+        
+            if (DomCoordinates.includes(flipped))
+                element.textContent = Ship[0];
+        
+            element.addEventListener("click", () => {
+                console.log(flipped);
+            });
+        });
+
+        //Remove a ship from the list when it is placed
         ShipContainList.remove(ShipContainList.selectedIndex)
+        ShipArray.splice(ShipArray.indexOf(Ship), 1)
+
+        
+        
+
 
 
     })
@@ -114,13 +248,10 @@ Twoplayer.addEventListener("click", () => {
         }
     }
 
-    //select all the grid 
-    const squares = document.querySelectorAll('.square')
-    squares.forEach(element => {
-        element.addEventListener("click", () =>
-        element.style.background = "red")
-    });
+    //Code to add ships
+    AddShips(body, Player1)
 
+   
     //Message telling you to place the boats 
     const Message = document.createElement("div")
     Message.classList.add("Message")
@@ -131,11 +262,8 @@ Twoplayer.addEventListener("click", () => {
     const Heading = document.querySelector(".Heading")
     Heading.textContent = "Player 1"
 
-    //Code 
-    AddShips(body)
     
-
-
+    
     //for (let i = 0; i < 10; i++) {
     //    let squarerow = document.createElement('div') 
     //    squarerow.classList.add("squarecontainer")
