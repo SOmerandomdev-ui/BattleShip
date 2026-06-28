@@ -81,7 +81,7 @@ function PlaceShips(start, end, Gameboard, Ship) {
     return PositionArray
 }
 
-function AddShips(Parent, Player) {
+function AddShips(Parent, Player, Complete) {
     //Ship Container title
     const ShipContainer = document.createElement('div')
     ShipContainer.classList.add("ShipContainer")
@@ -101,7 +101,8 @@ function AddShips(Parent, Player) {
     ShipContainList.appendChild(Placeholder)
 
     //Create the ship Selection
-    let ShipArray = ["Destroyer", "Submarine", "Cruiser", "Battleship", "Aircraft-Carrier"]
+    let ShipArray = ["Destroyer"]
+    //["Destroyer", "Submarine", "Cruiser", "Battleship", "Aircraft-Carrier"]
     for (let i = 0; i < 5; i++) {
         const ShipOption = document.createElement('option')
         ShipOption.classList.add(`${ShipArray[i]}`)
@@ -190,35 +191,67 @@ function AddShips(Parent, Player) {
         
             if (DomCoordinates.includes(flipped))
                 element.textContent = Ship[0];
-        
-            element.addEventListener("click", () => {
-                console.log(flipped);
-            });
         });
 
         //Remove a ship from the list when it is placed
         ShipContainList.remove(ShipContainList.selectedIndex)
         ShipArray.splice(ShipArray.indexOf(Ship), 1)
 
-        
-        
-
-
-
+        if (ShipArray.length == 0) {
+            ShipContainer.remove() 
+            Complete()
+        } 
     })
+}
+
+//Function for when the attack board is made and to logic for it 
+function AttackSetup(Parent) {
+    for (let i = 0; i < 10; i++) {
+        let squarerow = document.createElement('div') 
+        squarerow.classList.add("squarecontainer")
+        Parent.appendChild(squarerow)
+
+        for (let j = 0; j < 10; j++) {
+            let square = document.createElement('div')
+            square.classList.add("AttackSquare")
+            squarerow.appendChild(square)
+        }
+    }
+    const squares = document.querySelectorAll(".AttackSquare")
+    let selected = null
+
+    //While hovering over or clicking the squares it shrinks them, this is for better visibility 
+    squares.forEach(element => {
+        element.addEventListener("mouseover", () => {
+            if (selected !== element) element.style.transform = "scale(0.90)"
+        })
+
+        element.addEventListener("mouseleave", () => {
+            if (selected !== element) element.style.transform = "scale(1)"
+        })
+
+        element.addEventListener("click", () => {
+            if (selected === element) {
+                selected = null
+                element.style.transform = "scale(1)"
+            } else if (!selected) {
+                selected = element
+                element.style.transform = "scale(0.9)"
+            }
+        })
+    }
 
 
-    
-    
+)
+
 
 }
 
 const Singleplayer = document.querySelector('.Single')
 const Twoplayer = document.querySelector('.Double')
 
-Twoplayer.addEventListener("click", () => {
+Singleplayer.addEventListener("click", () => {
     const Player1 = new Player(prompt("What is Player 1's name"))
-    const Player2 = new Player(prompt("What is Player 2's name"))
 
     const Selection = document.querySelector(".Selection")
     Selection.remove()
@@ -247,11 +280,6 @@ Twoplayer.addEventListener("click", () => {
             squarerow.appendChild(square)
         }
     }
-
-    //Code to add ships
-    AddShips(body, Player1)
-
-   
     //Message telling you to place the boats 
     const Message = document.createElement("div")
     Message.classList.add("Message")
@@ -262,20 +290,17 @@ Twoplayer.addEventListener("click", () => {
     const Heading = document.querySelector(".Heading")
     Heading.textContent = "Player 1"
 
-    
-    
-    //for (let i = 0; i < 10; i++) {
-    //    let squarerow = document.createElement('div') 
-    //    squarerow.classList.add("squarecontainer")
-    //    AttackView.appendChild(squarerow)
-//
-    //    for (let j = 0; j < 10; j++) {
-    //        let square = document.createElement('div')
-    //        square.classList.add("square")
-    //        squarerow.appendChild(square)
-    //    }
-    //}
+    //Code to Add an attack button 
+    const AttackButton = document.createElement('div')
+    AttackButton.classList.add("AttackButton")
+    AttackButton.textContent = "Attack Button"
+    body.appendChild(AttackButton)
 
 
-
+    //Code to add ships
+    AddShips(body, Player1, () => {
+        Message.textContent = "Pick Your shot"
+        Setup.style.transform = "translate(-115%, -50%)"
+        AttackSetup(AttackView)
+    })
 })

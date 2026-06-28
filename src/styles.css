@@ -48,8 +48,8 @@ body {
 .Attackview {
     position: absolute;
     top: 50%;
-    right: 25%;
-    transform: translate(50%, -50%);
+    left: 50%;
+    transform: translate(15%, -50%);
 }
 
 .squarecontainer {
@@ -71,6 +71,21 @@ body {
 
     width: 10%;
     height: 100%;   
+}
+
+.AttackSquare {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        
+        background: radial-gradient(circle at center, #d64b4b, #d43a3a, #8a1a1a);
+
+        border: 0.5px rgb(172, 179, 186) solid;
+        font-size: 2rem;
+        font-weight: bold;
+
+        width: 10%;
+        height: 100%;   
 }
 
 .Message {
@@ -128,4 +143,22 @@ body {
     }
 }
 
+.AttackButton {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
 
+
+    border: 1px black solid;
+    padding: 1rem;
+    border-radius: 25px;
+    font-size: 1.8rem;
+    transition: background-color 0.5s ease;
+    
+     &:hover {
+        background-color: gray;
+        transition: background-color 0.5s ease;
+    }
+
+}
