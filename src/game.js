@@ -205,23 +205,29 @@ function AddShips(Parent, Player, Complete) {
 }
 
 //Function for when the attack board is made and to logic for it 
-function AttackSetup(Parent) {
+function AttackSetup(Parent, button, Player1, Player2) {
     for (let i = 0; i < 10; i++) {
         let squarerow = document.createElement('div') 
         squarerow.classList.add("squarecontainer")
-        Parent.appendChild(squarerow)
+        Parent.prepend(squarerow)  
 
-        for (let j = 0; j < 10; j++) {
-            let square = document.createElement('div')
-            square.classList.add("AttackSquare")
-            squarerow.appendChild(square)
-        }
+    for (let j = 0; j < 10; j++) {
+        let square = document.createElement('div')
+        square.classList.add("AttackSquare")
+        squarerow.appendChild(square)
     }
-    const squares = document.querySelectorAll(".AttackSquare")
+}
+    const AttackSquares = document.querySelectorAll(".AttackSquare")
+    const DefenseSquares = document.querySelectorAll(".square")
     let selected = null
+    let flippedIndex = null
 
-    //While hovering over or clicking the squares it shrinks them, this is for better visibility 
-    squares.forEach(element => {
+    //While hovering over or clicking the squares it shrinks them, this is for better visibility and also tracks the index 
+    AttackSquares.forEach((element, index) => {
+        const col = index % 10
+        const row = 9 - Math.floor(index / 10)
+        const coords = [col, row]
+
         element.addEventListener("mouseover", () => {
             if (selected !== element) element.style.transform = "scale(0.90)"
         })
@@ -233,18 +239,59 @@ function AttackSetup(Parent) {
         element.addEventListener("click", () => {
             if (selected === element) {
                 selected = null
+                flippedIndex = null
                 element.style.transform = "scale(1)"
+
             } else if (!selected) {
                 selected = element
                 element.style.transform = "scale(0.9)"
+                flippedIndex = coords
             }
         })
+    })
+    
+    //When pressing the attack button 
+    button.addEventListener("click", () => {
+        if (!selected) {
+            alert("Please select a square")
+            return 
+        }
+
+        //Code for you attacking 
+        selected.textContent = "X"
+        selected.style.transform = "scale(1)"
+        selected = null
+
+        Attack(Player2, flippedIndex)
+        
+        //Code for the computer attacking you 
+        ComputerSquareAttackNumber = RobotAttack()
+        Attack(Player1, ComputerSquareAttackNumber[0])
+        DefenseSquares.forEach((element, index) => {
+            if (index == ComputerSquareAttackNumber[1]) {
+                element.style.background = "rgb(255, 99, 99)"
+                element.style.transition = "background-color 0.5s ease"           
+            }
+        })
+    })
+}
+
+//Function to alter the game board 
+function Attack(Player, Coordinates) {
+    
+} 
+
+function RobotAttack() {
+    const DomSquareArray = Array.from({length: 100}, (_, i) => i)
+    
+    const RandomNumber = Math.floor(Math.random() * 100) // 0-99
+    const col = RandomNumber % 10
+    const row = Math.floor(RandomNumber / 10)
+    if (DomSquareArray.includes(RandomNumber)) {
+        DomSquareArray.splice(DomSquareArray.indexOf(RandomNumber), 1)
+        return [[col, row], RandomNumber]
     }
-
-
-)
-
-
+    else return Attacked(Player)     
 }
 
 const Singleplayer = document.querySelector('.Single')
@@ -252,6 +299,7 @@ const Twoplayer = document.querySelector('.Double')
 
 Singleplayer.addEventListener("click", () => {
     const Player1 = new Player(prompt("What is Player 1's name"))
+    const Player2 = new Player("Robot")
 
     const Selection = document.querySelector(".Selection")
     Selection.remove()
@@ -290,17 +338,17 @@ Singleplayer.addEventListener("click", () => {
     const Heading = document.querySelector(".Heading")
     Heading.textContent = "Player 1"
 
-    //Code to Add an attack button 
-    const AttackButton = document.createElement('div')
-    AttackButton.classList.add("AttackButton")
-    AttackButton.textContent = "Attack Button"
-    body.appendChild(AttackButton)
-
-
     //Code to add ships
     AddShips(body, Player1, () => {
         Message.textContent = "Pick Your shot"
         Setup.style.transform = "translate(-115%, -50%)"
-        AttackSetup(AttackView)
+
+        //Code to Add an attack button 
+        const AttackButton = document.createElement('div')
+        AttackButton.classList.add("AttackButton")
+        AttackButton.textContent = "Attack Button"
+        body.appendChild(AttackButton)
+
+        AttackSetup(AttackView, AttackButton, Player1, Player2)
     })
 })
