@@ -1,12 +1,14 @@
 export class Ship {
-    constructor(length) {
+    constructor(name, length) {
+        this.name = name 
         this.length = length
-        this.hit = 0
+        this.hits = 0
         this.sunk = false
     }
 
     hit() {
-        this.hit += 1 
+        this.hits += 1 
+        return this.isSunk()  
     }
 
     isSunk() {
@@ -18,6 +20,7 @@ export class Ship {
 export class Gameboard {
     constructor() {
         this.board = []
+        this.ships = 5
         for (let i = 0; i < 10; i++) {
             let row = []
             for (let j = 0; j < 10; j++) row.push(null)
@@ -26,6 +29,25 @@ export class Gameboard {
     }
 
     recieveAttack(x, y) {
+        if (this.board[x][y] == "hit") {
+            alert("You can't choose a square you already hit")
+            return false
+        }
+
+        //if there is a ship there
+        else if (this.board[x][y]) {
+            if (this.board[x][y].hit()) {
+                this.ships -= 1
+            }
+            this.board[x][y] = "hit"
+
+            if (this.ships == 0) alert("This game is over")
+            return true 
+        }
+
+        //if nothing is there 
+        this.board[x][y] = "hit"
+        return true 
 
     }
 }

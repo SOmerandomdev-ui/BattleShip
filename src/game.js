@@ -33,7 +33,7 @@ function CalculateDistance(start, end, ship) {
     }
 }
 
-//Places the markers 
+//Places the markers on the Gameboard object 
 function PlaceShips(start, end, Gameboard, Ship) {
     let PositionArray = []
     if (start[0] == end[0]) {
@@ -53,7 +53,7 @@ function PlaceShips(start, end, Gameboard, Ship) {
         for (let item of PositionArray) {
             let x = item[0]
             let y = item[1]
-            Gameboard.board[x][y] = Ship[0]
+            Gameboard.board[x][y] = Ship
         }
     }
 
@@ -74,14 +74,14 @@ function PlaceShips(start, end, Gameboard, Ship) {
         for (let item of PositionArray) {
             let x = item[0]
             let y = item[1]
-            Gameboard.board[x][y] = Ship[0]
+            Gameboard.board[x][y] = Ship
         }
     }
-    console.log(PositionArray)
+
     return PositionArray
 }
 
-function AddShips(Parent, Player, Complete) {
+function AddShipsDOM(Parent, Player, Complete) {
     //Ship Container title
     const ShipContainer = document.createElement('div')
     ShipContainer.classList.add("ShipContainer")
@@ -101,13 +101,15 @@ function AddShips(Parent, Player, Complete) {
     ShipContainList.appendChild(Placeholder)
 
     //Create the ship Selection
-    let ShipArray = ["Destroyer"]
+    let ShipArray = [["Destroyer", 2]]
     //["Destroyer", "Submarine", "Cruiser", "Battleship", "Aircraft-Carrier"]
-    for (let i = 0; i < 5; i++) {
+    for (let i = 0; i < 1; i++) {
+        const [name, size] = ShipArray[i]
         const ShipOption = document.createElement('option')
-        ShipOption.classList.add(`${ShipArray[i]}`)
-        ShipOption.value = ShipArray[i]
-        ShipOption.textContent = `${ShipArray[i]} ${i + 2} Spaces`
+        ShipOption.classList.add(`${name}`)
+        ShipOption.value = name
+        ShipOption.dataset.size = size
+        ShipOption.textContent = `${name} ${size} Spaces`
         ShipContainList.appendChild(ShipOption)
     }
 
@@ -146,7 +148,7 @@ function AddShips(Parent, Player, Complete) {
         }
 
         if (!/^[0-9, ]+$/.test(ShipCoordinateStart.value) && !/^[0-9, ]+$/.test(ShipCoordinateEnd.value)) {
-            alert("Please enter a valid coordinate e.g. 1,2")
+            alert("Please enter a valid coordinate e.g. 1, 2")
             return
         }
 
@@ -157,15 +159,20 @@ function AddShips(Parent, Player, Complete) {
         const Starty = parseInt(ShipCoordinateStartList[1])
         const Endx = parseInt(ShipCoordinateEndList[0])
         const Endy = parseInt(ShipCoordinateEndList[1])
-        const Ship = ShipContainList.value
         
+        //Make a ship object 
+        const ShipObject = new Ship(ShipContainList.value, ShipContainList.selectedOptions[0].dataset.size)
+
+        console.log(ShipObject)
+        
+        //Check to see if the start and end are out of bounds 
         if (Startx < 1 || Startx > 10 || Starty < 1 || Starty > 10 || Endx < 1 || Endx > 10 || Endy < 1 || Endy > 10) {
             alert("Please Enter a coodinate between 1 and 10 for the start and end points")
             return
         }
 
         //Check to see if the coordinates fit with the ship length 
-        if (CalculateDistance([Startx, Starty], [Endx, Endy], Ship)) return
+        if (CalculateDistance([Startx, Starty], [Endx, Endy], Ship.name)) return
 
         //Check to see if the user is trying to place them diagonally 
         if (Startx != Endx && Starty != Endy) {
@@ -173,14 +180,12 @@ function AddShips(Parent, Player, Complete) {
             return
         }
 
-        //Add the ship to the gameboard array  
-        const PlaceShipReturn = PlaceShips([Startx, Starty], [Endx, Endy], Player.Gameboard, Ship)
+        //Add the ship to the gameboard DOM and add them to the Gameboard object 
+        const PlaceShipReturn = PlaceShips([Startx, Starty], [Endx, Endy], Player.Gameboard, ShipObject)
         if (!PlaceShipReturn) return 
-        console.log(Player.Gameboard)
 
         //Find the squares which have ships on them 
         const DomCoordinates = PlaceShipReturn.map(array => array[1] + array[0] * 10)
-        console.log(DomCoordinates)
 
         //select all the grid 
         const squares = document.querySelectorAll('.square');
@@ -190,7 +195,7 @@ function AddShips(Parent, Player, Complete) {
             const flipped = (9 - row) * 10 + col;
         
             if (DomCoordinates.includes(flipped))
-                element.textContent = Ship[0];
+                element.textContent = ShipObject.name[0];
         });
 
         //Remove a ship from the list when it is placed
@@ -214,6 +219,7 @@ function AttackSetup(Parent, button, Player1, Player2) {
     for (let j = 0; j < 10; j++) {
         let square = document.createElement('div')
         square.classList.add("AttackSquare")
+    
         squarerow.appendChild(square)
     }
 }
@@ -262,36 +268,44 @@ function AttackSetup(Parent, button, Player1, Player2) {
         selected.style.transform = "scale(1)"
         selected = null
 
-        Attack(Player2, flippedIndex)
-        
-        //Code for the computer attacking you 
-        ComputerSquareAttackNumber = RobotAttack()
-        Attack(Player1, ComputerSquareAttackNumber[0])
-        DefenseSquares.forEach((element, index) => {
-            if (index == ComputerSquareAttackNumber[1]) {
-                element.style.background = "rgb(255, 99, 99)"
-                element.style.transition = "background-color 0.5s ease"           
-            }
-        })
+        if (Attack(Player2, flippedIndex)) {
+            //Code for the computer attacking you 
+            let ComputerSquareAttackNumber = RobotAttack(Player1.Gameboard)
+
+            Attack(Player1, ComputerSquareAttackNumber[0])
+            DefenseSquares.forEach((element, index) => {
+                if (index == ComputerSquareAttackNumber[1]) {
+                    element.style.background = "rgb(255, 99, 99)"
+                    element.style.transition = "background-color 0.5s ease"           
+                }
+            })
+        }
     })
 }
 
-//Function to alter the game board 
+//Function to alter the gameboard object  
 function Attack(Player, Coordinates) {
-    
+    const x = Coordinates[0]
+    const y = Coordinates[1]
+
+    if (Player.Gameboard.recieveAttack(x, y)) {
+        console.log(Player.Gameboard)
+        if (Player.Gameboard.ships == 0) {
+            alert(`Player ${Player.name} has lost`)
+            //Add Game finisher here 
+        }
+        return true 
+    }
 } 
 
-function RobotAttack() {
-    const DomSquareArray = Array.from({length: 100}, (_, i) => i)
-    
+function RobotAttack(Gameboard) {  
     const RandomNumber = Math.floor(Math.random() * 100) // 0-99
     const col = RandomNumber % 10
     const row = Math.floor(RandomNumber / 10)
-    if (DomSquareArray.includes(RandomNumber)) {
-        DomSquareArray.splice(DomSquareArray.indexOf(RandomNumber), 1)
-        return [[col, row], RandomNumber]
+     if (Gameboard.board[col][row] == "hit") {
+        return RobotAttack(Gameboard) 
     }
-    else return Attacked(Player)     
+    else return [[col, row], RandomNumber]  
 }
 
 const Singleplayer = document.querySelector('.Single')
@@ -339,7 +353,7 @@ Singleplayer.addEventListener("click", () => {
     Heading.textContent = "Player 1"
 
     //Code to add ships
-    AddShips(body, Player1, () => {
+    AddShipsDOM(body, Player1, () => {
         Message.textContent = "Pick Your shot"
         Setup.style.transform = "translate(-115%, -50%)"
 
