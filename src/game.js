@@ -33,6 +33,83 @@ function CalculateDistance(start, end, ship) {
     }
 }
 
+function RobotPlaceShips(Gameboard) {
+    const Ship1 = new Ship("Destoryer", 2)
+    const Ship2 = new Ship("Submarine", 3)
+    const Ship3 = new Ship("Cruiser", 4)
+    const Ship4 = new Ship("Battleship", 5)
+    const Ship5 = new Ship("Aircraft-Carrier", 6)
+
+    for (let i = 1; i < 6; i++) { 
+        //Track which spots are not taken 
+        const PositionArray = []
+        //Get start and end coords based on the ship length we are looking at 
+        let Startx = Math.floor(Math.random() * (10 - i));
+        let Starty = Math.floor(Math.random() * (10 - i));
+        let Endx = Startx
+        let Endy = Starty
+
+        Math.random() < 0.5 ? Endx += i : Endy += i
+        
+        //For the y-axis
+        if (Startx == Endx) {
+            while (Starty <= Endy) {
+                if (Gameboard.board[Startx][Starty]) {
+                    PositionArray.length = 0 
+                    i--
+                    break  
+                }
+        
+                PositionArray.push([Startx, Starty] )
+                Starty += 1
+        }
+        }
+
+        if (Starty == Endy) {
+            while (Startx <= Endx) {
+                if (Gameboard.board[Startx][Starty]) {
+                    PositionArray.length = 0 
+                    i--
+                    break  
+                }
+        
+                PositionArray.push([Startx, Starty] )
+                Startx += 1
+        }
+        }
+
+        for (let item of PositionArray) {
+            let x = item[0]
+            let y = item[1]
+
+            switch (PositionArray.length){
+                case 2: 
+                    Gameboard.board[x][y] = Ship1
+                    break
+                case 3: 
+                    Gameboard.board[x][y] = Ship2
+                    break
+                case 4: 
+                    Gameboard.board[x][y] = Ship3
+                    break
+                case 5: 
+                    Gameboard.board[x][y] = Ship4
+                    break
+                case 6: 
+                    Gameboard.board[x][y] = Ship5
+                    break 
+            }
+            
+        }
+       
+    } 
+
+    
+    
+
+
+
+}
 //Places the markers on the Gameboard object 
 function PlaceShips(start, end, Gameboard, Ship) {
     let PositionArray = []
@@ -80,6 +157,7 @@ function PlaceShips(start, end, Gameboard, Ship) {
 
     return PositionArray
 }
+
 
 function AddShipsDOM(Parent, Player, Complete) {
     //Ship Container title
@@ -162,8 +240,6 @@ function AddShipsDOM(Parent, Player, Complete) {
         
         //Make a ship object 
         const ShipObject = new Ship(ShipContainList.value, ShipContainList.selectedOptions[0].dataset.size)
-
-        console.log(ShipObject)
         
         //Check to see if the start and end are out of bounds 
         if (Startx < 1 || Startx > 10 || Starty < 1 || Starty > 10 || Endx < 1 || Endx > 10 || Endy < 1 || Endy > 10) {
@@ -248,7 +324,10 @@ function AttackSetup(Parent, button, Player1, Player2) {
                 flippedIndex = null
                 element.style.transform = "scale(1)"
 
-            } else if (!selected) {
+            } else  {
+                if (selected) {
+                    selected.style.transform = "scale(1)" 
+                }
                 selected = element
                 element.style.transform = "scale(0.9)"
                 flippedIndex = coords
@@ -264,12 +343,22 @@ function AttackSetup(Parent, button, Player1, Player2) {
         }
 
         //Code for you attacking 
-        selected.textContent = "X"
-        selected.style.transform = "scale(1)"
-        selected = null
+        if (Player2.Gameboard.board[flippedIndex[0]][flippedIndex[1]]) {
+            selected.style.background = "black "
+            selected.style.transform = "scale(1)"
+            selected = null
+        }
+
+        else {
+            selected.textContent = "X"
+            selected.style.transform = "scale(1)"
+            selected = null
+        }
 
         if (Attack(Player2, flippedIndex)) {
             //Code for the computer attacking you 
+            console.log(Player2.Gameboard.board)
+            console.log(Player2.Gameboard.ships)
             let ComputerSquareAttackNumber = RobotAttack(Player1.Gameboard)
 
             Attack(Player1, ComputerSquareAttackNumber[0])
@@ -284,18 +373,14 @@ function AttackSetup(Parent, button, Player1, Player2) {
 }
 
 //Function to alter the gameboard object  
-function Attack(Player, Coordinates) {
+function Attack(Player, Coordinates, ChangeDOM) {
     const x = Coordinates[0]
     const y = Coordinates[1]
 
-    if (Player.Gameboard.recieveAttack(x, y)) {
-        console.log(Player.Gameboard)
-        if (Player.Gameboard.ships == 0) {
-            alert(`Player ${Player.name} has lost`)
-            //Add Game finisher here 
-        }
-        return true 
-    }
+    (Player.Gameboard.recieveAttack(x, y))
+
+    return CheckGameOver(Player, ChangeDOM)
+    
 } 
 
 function RobotAttack(Gameboard) {  
@@ -308,6 +393,15 @@ function RobotAttack(Gameboard) {
     else return [[col, row], RandomNumber]  
 }
 
+function CheckGameOver(Player, ChangeDOM) {
+    if (Player.Gameboard.ships.length === 0) {
+        alert(`${Player.name} has Lost`)
+        ChangeDOM()
+        return true
+
+    }
+    return false
+}
 const Singleplayer = document.querySelector('.Single')
 const Twoplayer = document.querySelector('.Double')
 
@@ -363,6 +457,14 @@ Singleplayer.addEventListener("click", () => {
         AttackButton.textContent = "Attack Button"
         body.appendChild(AttackButton)
 
+        //Code to add the robot ships 
+        RobotPlaceShips(Player2.Gameboard) 
+        console.log(Player2.Gameboard)
+
         AttackSetup(AttackView, AttackButton, Player1, Player2)
+
+
     })
 })
+
+//ADD CHEK LOGIC WITH A CALLBACK AND CHANGE THE DOM 

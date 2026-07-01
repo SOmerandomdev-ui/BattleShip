@@ -40,8 +40,6 @@ export class Gameboard {
                 this.ships -= 1
             }
             this.board[x][y] = "hit"
-
-            if (this.ships == 0) alert("This game is over")
             return true 
         }
 
